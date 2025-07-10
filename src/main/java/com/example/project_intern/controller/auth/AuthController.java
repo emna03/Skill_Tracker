@@ -1,5 +1,6 @@
 package com.example.project_intern.controller.auth;
 
+import com.example.project_intern.dto.ApiResponse;
 import com.example.project_intern.model.Utilisateur;
 import com.example.project_intern.repository.UtilisateurRepository;
 import com.example.project_intern.security.jwt.JwtService;
@@ -27,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -36,9 +37,13 @@ public class AuthController {
             );
             Utilisateur user = utilisateurRepository.findByEmail(request.getEmail()).get();
             String token = jwtService.generateToken(user.getEmail());
-            return ResponseEntity.ok(new JwtResponse(token));
+            return ResponseEntity.ok(
+                    new ApiResponse<>(true, "Connexion réussie", new JwtResponse(token))
+            );
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Identifiants invalides");
+            return ResponseEntity.status(401).body(
+                    new ApiResponse<>(false, "Identifiants invalides", null)
+            );
         }
     }
 }

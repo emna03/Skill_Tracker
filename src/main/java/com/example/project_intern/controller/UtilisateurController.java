@@ -1,8 +1,10 @@
 package com.example.project_intern.controller;
 
+import com.example.project_intern.dto.ApiResponse;
 import com.example.project_intern.model.Utilisateur;
 import com.example.project_intern.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,19 +19,25 @@ public class UtilisateurController {
 
     // GET /utilisateurs
     @GetMapping
-    public List<Utilisateur> getAll() {
-        return utilisateurRepository.findAll();
+    public ResponseEntity<ApiResponse<List<Utilisateur>>> getAll() {
+        List<Utilisateur> utilisateurs = utilisateurRepository.findAll();
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Liste des utilisateurs récupérée avec succès", utilisateurs)
+        );
     }
 
     // POST /utilisateurs
     @PostMapping
-    public Utilisateur create(@RequestBody Utilisateur utilisateur) {
-        return utilisateurRepository.save(utilisateur);
+    public ResponseEntity<ApiResponse<Utilisateur>> create(@RequestBody Utilisateur utilisateur) {
+        Utilisateur saved = utilisateurRepository.save(utilisateur);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Utilisateur ajouté avec succès", saved)
+        );
     }
 
     // PUT /utilisateurs/{id}
     @PutMapping("/{id}")
-    public Utilisateur update(@PathVariable Long id, @RequestBody Utilisateur updated) {
+    public ResponseEntity<ApiResponse<Utilisateur>> update(@PathVariable Long id, @RequestBody Utilisateur updated) {
         return utilisateurRepository.findById(id).map(u -> {
             u.setNom(updated.getNom());
             u.setPrenom(updated.getPrenom());
@@ -41,16 +49,25 @@ public class UtilisateurController {
             u.setNiveau(updated.getNiveau());
             u.setObjectifs(updated.getObjectifs());
             u.setHistorique(updated.getHistorique());
-            return utilisateurRepository.save(u);
+            Utilisateur saved = utilisateurRepository.save(u);
+            return ResponseEntity.ok(
+                    new ApiResponse<>(true, "Utilisateur mis à jour", saved)
+            );
         }).orElseGet(() -> {
             updated.setId(id);
-            return utilisateurRepository.save(updated);
+            Utilisateur saved = utilisateurRepository.save(updated);
+            return ResponseEntity.ok(
+                    new ApiResponse<>(true, "Utilisateur créé car introuvable", saved)
+            );
         });
     }
 
     // DELETE /utilisateurs/{id}
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         utilisateurRepository.deleteById(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Utilisateur supprimé avec succès", null)
+        );
     }
 }
