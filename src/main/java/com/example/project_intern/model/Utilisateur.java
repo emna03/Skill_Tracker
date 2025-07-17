@@ -2,6 +2,9 @@ package com.example.project_intern.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Utilisateur {
 
@@ -15,17 +18,23 @@ public class Utilisateur {
     private String motDePasse;
     private String telephone;
     private String adresse;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
     private String niveau;
     private String objectifs;
     private String historique;
+    private String poste;
+
+
+    @ManyToMany
+    private List<Parcours> parcours = new ArrayList<>();
 
     public Utilisateur() {}
 
     public Utilisateur(String nom, String prenom, String email, String motDePasse, String telephone,
-                       String adresse, Role role, String niveau, String objectifs, String historique) {
+                       String adresse, Role role, String niveau, String objectifs, String historique,String poste) {
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
@@ -36,16 +45,12 @@ public class Utilisateur {
         this.niveau = niveau;
         this.objectifs = objectifs;
         this.historique = historique;
+        this.poste = poste;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    // getters/setters (incluant getParcours/setParcours)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
@@ -76,4 +81,15 @@ public class Utilisateur {
 
     public String getHistorique() { return historique; }
     public void setHistorique(String historique) { this.historique = historique; }
+
+    public List<Parcours> getParcours() { return parcours; }
+    public void setParcours(List<Parcours> parcours) { this.parcours = parcours; }
+
+    public String getPoste() {
+        return poste;
+    }
+    public void setPoste(String poste) {
+        this.poste = poste;
+    }
+
 }

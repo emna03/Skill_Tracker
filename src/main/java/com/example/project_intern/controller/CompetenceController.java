@@ -32,6 +32,7 @@ public class CompetenceController {
         return competenceRepository.findById(id).map(c -> {
             c.setNom(updated.getNom());
             c.setDescription(updated.getDescription());
+            c.setCategorie(updated.getCategorie());
             return competenceRepository.save(c);
         }).orElseGet(() -> {
             updated.setId(id);

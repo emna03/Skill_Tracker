@@ -1,33 +1,36 @@
 package com.example.project_intern.controller;
 
+import com.example.project_intern.model.Parcours;
 import com.example.project_intern.model.Utilisateur;
+import com.example.project_intern.repository.ParcoursRepository;
 import com.example.project_intern.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/utilisateurs")
-@CrossOrigin(origins = "*") // permet l'accès depuis Postman ou Angular
+@CrossOrigin(origins = "*")
 public class UtilisateurController {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
-    // GET /utilisateurs
+    @Autowired
+    private ParcoursRepository parcoursRepository;
+
     @GetMapping
     public List<Utilisateur> getAll() {
         return utilisateurRepository.findAll();
     }
 
-    // POST /utilisateurs
     @PostMapping
     public Utilisateur create(@RequestBody Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
     }
 
-    // PUT /utilisateurs/{id}
     @PutMapping("/{id}")
     public Utilisateur update(@PathVariable Long id, @RequestBody Utilisateur updated) {
         return utilisateurRepository.findById(id).map(u -> {
@@ -41,6 +44,8 @@ public class UtilisateurController {
             u.setNiveau(updated.getNiveau());
             u.setObjectifs(updated.getObjectifs());
             u.setHistorique(updated.getHistorique());
+            u.setPoste(updated.getPoste());
+            u.setParcours(updated.getParcours());
             return utilisateurRepository.save(u);
         }).orElseGet(() -> {
             updated.setId(id);
@@ -48,9 +53,24 @@ public class UtilisateurController {
         });
     }
 
-    // DELETE /utilisateurs/{id}
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         utilisateurRepository.deleteById(id);
+    }
+
+    @PostMapping("/{userId}/parcours/{parcoursId}")
+    public ResponseEntity<String> assignParcoursToUser(@PathVariable Long userId, @PathVariable Long parcoursId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        Parcours parcours = parcoursRepository.findById(parcoursId)
+                .orElseThrow(() -> new RuntimeException("Parcours non trouvé"));
+
+        if (!utilisateur.getParcours().contains(parcours)) {
+            utilisateur.getParcours().add(parcours);
+            utilisateurRepository.save(utilisateur);
+        }
+
+        return ResponseEntity.ok("Parcours assigné avec succès !");
     }
 }
